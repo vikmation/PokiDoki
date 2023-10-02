@@ -40,16 +40,16 @@ with gr.Blocks() as demo:
     with gr.Row():
         with gr.Column():
             gr.Markdown("# Player 1")
-            gr.Markdown("![Player 4](https://picsum.photos/200/300)")
+            gr.Markdown("""![Imgur](https://i.imgur.com/y0J34Kk.png)""") 
         with gr.Column():
             gr.Markdown("# Player 2")
-            gr.Markdown("![Player 4](https://picsum.photos/200/300)")
+            gr.Markdown("""![Imgur](https://i.imgur.com/y0J34Kk.png)""") 
     with gr.Row():
         with gr.Column():
-            gr.Markdown("![Player 4](https://picsum.photos/200/300)")
+            gr.Markdown("""![Imgur](https://i.imgur.com/cBmgK2I.png)""")
             gr.Markdown("# Player 3")
         with gr.Column():
-            gr.Markdown("![Player 4](https://picsum.photos/200/300)")
+            gr.Markdown("""![Imgur](https://i.imgur.com/cBmgK2I.png)""")
             gr.Markdown("# Player 4")
 
-demo.launch()
+demo.launch(server_name="localhost")
