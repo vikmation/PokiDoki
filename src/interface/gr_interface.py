@@ -41,14 +41,26 @@ with gr.Blocks() as demo:
         with gr.Column():
             gr.Markdown("# Player 1")
             gr.Markdown("""![Imgur](https://i.imgur.com/y0J34Kk.png)""") 
+            gr.Textbox("coins: 2000 status: fold small blind")
         with gr.Column():
             gr.Markdown("# Player 2")
             gr.Markdown("""![Imgur](https://i.imgur.com/y0J34Kk.png)""") 
+            gr.Textbox("coins: 2000 status: fold big blind")
+
+    with gr.Row():
+        #middle
+        gr.Column()  # Empty column as left spacer
+        with gr.Column():
+            gr.Markdown("""![Imgur](https://i.imgur.com/cBmgK2I.png)""")
+        gr.Column()  # Empty column as right spacer
+
     with gr.Row():
         with gr.Column():
+            gr.Textbox("coins: 2000 status: fold")
             gr.Markdown("""![Imgur](https://i.imgur.com/cBmgK2I.png)""")
             gr.Markdown("# Player 3")
         with gr.Column():
+            gr.Textbox("coins: 2000 status: fold")
             gr.Markdown("""![Imgur](https://i.imgur.com/cBmgK2I.png)""")
             gr.Markdown("# Player 4")
 
