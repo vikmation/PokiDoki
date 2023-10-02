@@ -1,0 +1,47 @@
+poker-simulation/
+│
+├── src/
+│   ├── __init__.py
+│   ├── main.py             # Main script to run the game
+│   ├── engine/
+│   │   ├── __init__.py
+│   │   ├── game_engine.py  # Handles the game's main loop, player turns, etc.
+│   │   └── poker_table.py  # Handles the table, community cards, pot, etc.
+│   │
+│   ├── player/
+│   │   ├── __init__.py
+│   │   ├── player.py       # Player class, handles player actions, hand, chips, etc.
+│   │   └── ai_player.py    # AI player class, inherits from player, adds AI behavior
+│   │
+│   ├── card/
+│   │   ├── __init__.py
+│   │   ├── card.py         # Card class, defines a playing card
+│   │   └── deck.py         # Deck class, handles deck generation, shuffling, dealing, etc.
+│   │
+│   ├── interface/
+│   │   ├── __init__.py
+│   │   └── gr_interface.py # Gradio interface for user interactions
+│   │
+│   └── utils/
+│       ├── __init__.py
+│       ├── validators.py   # Validation utilities for player actions, bets, etc.
+│       └── helpers.py      # Other helper functions
+│
+├── config/
+│   ├── player_one.yaml     # Configuration files for players
+│   ├── player_two.yaml
+│   ├── player_three.yaml
+│   └── player_four.yaml
+│
+├── logs/
+│   └── game_logs.txt       # Log file (could also be .log or .json depending on your preference)
+│
+├── tests/
+│   ├── __init__.py
+│   ├── test_player.py      # Unit tests for player classes
+│   ├── test_card.py        # Unit tests for card and deck classes
+│   └── test_engine.py      # Unit tests for game engine and poker table classes
+│
+├── .gitignore              # Git ignore file to exclude files and directories like __pycache__, logs, etc.
+├── requirements.txt        # Project dependencies
+└── README.md               # Project documentation
