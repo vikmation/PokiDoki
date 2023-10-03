@@ -38,30 +38,32 @@ def resize_image(image_path, size=(100, 100)):
 
 with gr.Blocks() as demo:
     with gr.Row():
+        with gr.Row():
+            with gr.Column():
+                gr.Markdown("# Player 1")
+                gr.Markdown("""![Imgur](https://i.imgur.com/y0J34Kk.png)""") 
+                gr.Textbox("coins: 2000 status: fold small blind")
+            with gr.Column():
+                gr.Textbox("coins: 2000 status: fold")
+                gr.Markdown("""![Imgur](https://i.imgur.com/cBmgK2I.png)""")
+                gr.Markdown("# Player 3")
+        with gr.Row():
+            gr.Column()
+            with gr.Column():
+                gr.Markdown("""![Imgur](https://i.imgur.com/cBmgK2I.png)""")
+        with gr.Row():
+            with gr.Column():
+                gr.Markdown("# Player 2")
+                gr.Markdown("""![Imgur](https://i.imgur.com/y0J34Kk.png)""") 
+                gr.Textbox("coins: 2000 status: fold big blind")
+            with gr.Column():
+                gr.Textbox("coins: 2000 status: fold")
+                gr.Markdown("""![Imgur](https://i.imgur.com/cBmgK2I.png)""")
+                gr.Markdown("# Player 4")
         with gr.Column():
-            gr.Markdown("# Player 1")
-            gr.Markdown("""![Imgur](https://i.imgur.com/y0J34Kk.png)""") 
-            gr.Textbox("coins: 2000 status: fold small blind")
-        with gr.Column():
-            gr.Markdown("# Player 2")
-            gr.Markdown("""![Imgur](https://i.imgur.com/y0J34Kk.png)""") 
-            gr.Textbox("coins: 2000 status: fold big blind")
-
-    with gr.Row():
-        #middle
-        gr.Column()  # Empty column as left spacer
-        with gr.Column():
-            gr.Markdown("""![Imgur](https://i.imgur.com/cBmgK2I.png)""")
-        gr.Column()  # Empty column as right spacer
-
-    with gr.Row():
-        with gr.Column():
-            gr.Textbox("coins: 2000 status: fold")
-            gr.Markdown("""![Imgur](https://i.imgur.com/cBmgK2I.png)""")
-            gr.Markdown("# Player 3")
-        with gr.Column():
-            gr.Textbox("coins: 2000 status: fold")
-            gr.Markdown("""![Imgur](https://i.imgur.com/cBmgK2I.png)""")
-            gr.Markdown("# Player 4")
+                with gr.Row():
+                    gr.Button('Round 1')
+                with gr.Row():
+                    gr.Textbox(lines=35, placeholder='Logs will be displayed here')
 
 demo.launch(server_name="localhost")
