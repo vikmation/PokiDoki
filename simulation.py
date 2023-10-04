@@ -1,0 +1,152 @@
+"""
+from engine.game_engine import GameEngine
+from engine.poker_table import PokerTable
+from player.player import Player
+
+# Create poker table and players
+poker_table = PokerTable()
+player1 = Player("Alice", 1000)
+player2 = Player("Bob", 1000)
+
+# Add players to table
+poker_table.players.append(player1)
+poker_table.players.append(player2)
+
+# Create game engine
+game_engine = GameEngine(poker_table)
+
+# Start a round
+game_engine.start_round()
+
+# Print players' hands and community cards
+print(f"Alice's hand: {player1.hand}")
+print(f"Bob's hand: {player2.hand}")
+print(f"Community cards: {poker_table.community_cards}")
+---------------------------------------------------------
+agent(
+    path_to_player_config_files=[
+        "player_one.yaml",
+        "player_two.yaml",
+        "player_three.yaml",
+        "player_four.yaml"
+    ],
+    api_key="openai_key",
+    model_name="model_name",
+    table_config="table_config.yaml",
+    logging="true"
+)
+"""
+
+#init players
+
+#create card deck 
+
+#player set small and big blind 
+
+#give first two cards
+
+#betting round 
+
+#first three cards 
+
+#betting round 
+
+#deal turn
+
+#betting round 
+
+#deal_river
+
+#betting round 
+
+#evaluate_hands
+
+#end round
+import random
+import yaml
+from poker import Suit, Rank, Card, Hand
+
+class PokerGame:
+    def __init__(self, players):
+        #player init happens during calling class
+        self.players = players
+        self.player_data = {}  
+        self.deck = list(Card)
+        # Create a deck of cards
+        self.community_cards = []
+        self.pot = 0
+
+    def init_players(self):
+        for player_file in self.players:
+            with open(player_file, 'r') as file:
+                self.player_data[player_file] = yaml.safe_load(file)
+
+    def start_round(self):
+        self.init_players()
+        for player_name, player_attributes in self.player_data.items():
+            player_attributes['hand'] = [self.deck.pop(), self.deck.pop()]
+
+    def betting_round(self):
+        # Get the players who are currently the small and big blind
+        small_blind_player = next((player for player, attributes in self.player_data.items() if attributes.get('small_blind')), None)
+        big_blind_player = next((player for player, attributes in self.player_data.items() if attributes.get('big_blind')), None)
+
+        # If the small and big blind players exist, rotate them
+        if small_blind_player and big_blind_player:
+            # Remove the small and big blind attributes from the current players
+            self.player_data[small_blind_player]['small_blind'] = False
+            self.player_data[big_blind_player]['big_blind'] = False
+
+            # Get the list of players
+            players = list(self.player_data.keys())
+
+            # Set the small blind to the player after the current big blind
+            new_small_blind_player = players[(players.index(big_blind_player) + 1) % len(players)]
+            self.player_data[new_small_blind_player]['small_blind'] = True
+
+            # Set the big blind to the player after the new small blind
+            new_big_blind_player = players[(players.index(new_small_blind_player) + 1) % len(players)]
+            self.player_data[new_big_blind_player]['big_blind'] = True
+        else:
+            # If the small and big blind players don't exist, assign them randomly
+            players = list(self.player_data.keys())
+            random.shuffle(players)
+
+            self.player_data[players[0]]['small_blind'] = True
+            self.player_data[players[1]]['big_blind'] = True
+
+    def deal_flop(self):
+        pass 
+
+    def deal_turn(self):
+        pass
+
+    def deal_river(self):
+        pass
+
+    def evaluate_hands(self):
+        pass
+
+    def end_round(self):
+        #pot goes to winner
+        pass
+
+# Create players
+#players = [Player("Alice", 1000), Player("Bob", 1000)]
+#todo make this the path to the yaml file
+players = ['player_one.yaml', 'player_two.yaml', 'player_three.yaml', 'player_four.yaml']
+
+# Create game
+game = PokerGame(players)
+
+# Play a round
+game.start_round()
+game.betting_round()
+game.deal_flop()
+game.betting_round()
+game.deal_turn()
+"""game.betting_round()
+game.deal_river()
+game.betting_round()
+game.evaluate_hands()
+game.end_round()"""

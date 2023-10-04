@@ -1,0 +1,16 @@
+playerName: "Player One"
+playerImage: #path to image url
+
+description: description of player with attributes
+
+voice: #link to voice used by the player
+
+# Attributes of the player, these can be used to dictate the player's behavior if it's an AI player
+attributes:
+  aggressiveness: 7  # on a scale of 1-10
+  riskTolerance: 5   # on a scale of 1-10
+  strategy: "balanced" # could also be "aggressive", "defensive", "random" etc.
+
+# The initial number of chips the player has at the start of the game
+chips: 1000
+
