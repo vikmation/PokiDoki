@@ -86,7 +86,7 @@ class PokerGame:
         for player_name, player_attributes in self.player_data.items():
             player_attributes['hand'] = [self.deck.pop(), self.deck.pop()]
 
-    def betting_round(self):
+    def set_blinds(self):
         # Get the players who are currently the small and big blind
         small_blind_player = next((player for player, attributes in self.player_data.items() if attributes.get('small_blind')), None)
         big_blind_player = next((player for player, attributes in self.player_data.items() if attributes.get('big_blind')), None)
@@ -111,9 +111,35 @@ class PokerGame:
             # If the small and big blind players don't exist, assign them randomly
             players = list(self.player_data.keys())
             random.shuffle(players)
-
             self.player_data[players[0]]['small_blind'] = True
             self.player_data[players[1]]['big_blind'] = True
+        print(self.player_data)
+
+    def player_bet(self, next_player):
+        player_data = self.player_data[next_player]
+        prompt = f"""
+        You are playing a 9 player Texas No-limit Holdem poker game. You have the following personality:
+        
+        {player_data}
+        
+        You will be provided with your position at the table and the hand you’re holding. Please
+        provide your pre-flop decision.
+        Assume you are the first to act and everyone before you has folded, thus
+        your decisions can be one of fold, raise or limp. If you are placing a bet, please
+        specify your best size in terms of big blinds.
+        Provide your decision without any explanation in the following format:
+        DECISION(Raise, Fold, Limp), N BB (if placing a bet, replace N by bet amount)
+        """
+        print(prompt)
+
+    def betting_round(self):
+        self.set_blinds()
+        #identify player after big blind and let him make a bet 
+        big_blind_player = next((player for player, attributes in self.player_data.items() if attributes.get('big_blind')), None)
+        players = list(self.player_data.keys())
+        next_player = players[(players.index(big_blind_player) + 1) % len(players)]
+        self.player_bet(next_player)
+
 
     def deal_flop(self):
         pass 
@@ -142,9 +168,9 @@ game = PokerGame(players)
 # Play a round
 game.start_round()
 game.betting_round()
-game.deal_flop()
-game.betting_round()
-game.deal_turn()
+#game.deal_flop()
+#game.betting_round()
+#game.deal_turn()
 """game.betting_round()
 game.deal_river()
 game.betting_round()
