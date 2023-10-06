@@ -75,6 +75,7 @@ class PokerGame:
         # Create a deck of cards
         self.community_cards = []
         self.pot = 0
+        self.current_bet = 0
 
     def init_players(self):
         for player_file in self.players:
@@ -122,7 +123,7 @@ class PokerGame:
         
         {player_data}
         
-        You will be provided with your position at the table and the hand you’re holding. Please
+        You will be provided with your position at the table and the hand you’yre holding. Please
         provide your pre-flop decision.
         Assume you are the first to act and everyone before you has folded, thus
         your decisions can be one of fold, raise or limp. If you are placing a bet, please
@@ -131,15 +132,53 @@ class PokerGame:
         DECISION(Raise, Fold, Limp), N BB (if placing a bet, replace N by bet amount)
         """
         print(prompt)
+        #parse option and than return
+
+    def current_bet(self):
+        current_bet = max(player['bet'] for player in self.player_data.values() if 'bet' in player)
+        return current_bet
 
     def betting_round(self):
+        # Start with the player after the big blind
         self.set_blinds()
         #identify player after big blind and let him make a bet 
         big_blind_player = next((player for player, attributes in self.player_data.items() if attributes.get('big_blind')), None)
         players = list(self.player_data.keys())
         next_player = players[(players.index(big_blind_player) + 1) % len(players)]
-        self.player_bet(next_player)
-
+        all_bets_done = False
+        # Keep track of the last player to raise (we need to keep going until we get back to them)
+        #last_raiser = start_player
+        # Keep going until we get back to the last player to raise
+        i = next_player
+        while True:
+            player = self.players[i]
+            if self.player_data['option'] == 'fold':
+                # This player has folded, so they don't get a turn
+                pass
+            elif self.player_data['option'] < self.current_bet:
+                action = self.player_bet(player)
+                if action == 'fold':
+                    self.player_data['option'] = 'fold'
+                elif action == 'call':
+                    self.player_data['bet'] = self.current_bet
+                elif action == 'raise':
+                    #raise is set to value which comes back from current bet
+                    self.player_data['bet'] = action
+                    #raise_amount = player.get_raise_amount(current_bet)
+                    last_raiser = i
+            else:
+                # This player has the option to check or raise
+                action = player.get_action(current_bet)
+                if action == 'raise':
+                    raise_amount = player.get_raise_amount(current_bet)
+                    current_bet += raise_amount
+                    player.chips_in_pot = current_bet
+                    last_raiser = i
+            # Move on to the next player
+            i = (i + 1) % len(self.players)
+            if i == last_raiser:
+                # We've gotten back to the last player to raise, so the betting round is over
+                break
 
     def deal_flop(self):
         pass 
