@@ -118,17 +118,28 @@ class PokerGame:
 
     def player_bet(self, next_player):
         player_data = self.player_data[next_player]
+        player_personality = f"""
+        name: {player_data["name"]}
+        personality description: {player_data["description"]}
+        aggressiveness: {player_data["aggressiveness"]}
+        risk tolerance: {player_data["riskTolerance"]}
+        strategy: {player_data["balanced"]}
+        """        
+        rounds = [
+            "It's pre-flop and there are no community cards on the table.",
+            f"It's the flop and the community cards on the table are {self.community_cards}.",
+            f"It's the turn and the community cards on the table are {self.community_cards}.",
+            f"It's the river and the community cards on the table are {self.community_cards}.",
+            f"It's post-river, the final betting round and the community cards on the table are {self.community_cards}."
+        ]
         prompt = f"""
-        You are playing a 9 player Texas No-limit Holdem poker game. You have the following personality:
+        You are playing a 4 player Texas No-limit Holdem poker game. You have the following personality:
         
-        {player_data}
+        {player_personality}
+
+        {round} and your hand is {player_data["hand"]}. the history of the current round is {round_history}.
         
-        You will be provided with your position at the table and the hand you’yre holding. Please
-        provide your pre-flop decision.
-        Assume you are the first to act and everyone before you has folded, thus
-        your decisions can be one of fold, raise or limp. If you are placing a bet, please
-        specify your best size in terms of big blinds.
-        Provide your decision without any explanation in the following format:
+        Your decisions can be one of fold, raise or limp. Provide your decision without any explanation in the following format:
         DECISION(Raise, Fold, Limp), N BB (if placing a bet, replace N by bet amount)
         """
         print(prompt)
@@ -139,16 +150,10 @@ class PokerGame:
         return current_bet
 
     def betting_round(self):
-        # Start with the player after the big blind
         self.set_blinds()
-        #identify player after big blind and let him make a bet 
         big_blind_player = next((player for player, attributes in self.player_data.items() if attributes.get('big_blind')), None)
         players = list(self.player_data.keys())
         next_player = players[(players.index(big_blind_player) + 1) % len(players)]
-        all_bets_done = False
-        # Keep track of the last player to raise (we need to keep going until we get back to them)
-        #last_raiser = start_player
-        # Keep going until we get back to the last player to raise
         i = next_player
         while True:
             player = self.players[i]
@@ -164,17 +169,14 @@ class PokerGame:
                 elif action == 'raise':
                     #raise is set to value which comes back from current bet
                     self.player_data['bet'] = action
-                    #raise_amount = player.get_raise_amount(current_bet)
                     last_raiser = i
             else:
-                # This player has the option to check or raise
                 action = player.get_action(current_bet)
                 if action == 'raise':
                     raise_amount = player.get_raise_amount(current_bet)
                     current_bet += raise_amount
                     player.chips_in_pot = current_bet
                     last_raiser = i
-            # Move on to the next player
             i = (i + 1) % len(self.players)
             if i == last_raiser:
                 # We've gotten back to the last player to raise, so the betting round is over
@@ -200,12 +202,11 @@ class PokerGame:
 #players = [Player("Alice", 1000), Player("Bob", 1000)]
 #todo make this the path to the yaml file
 players = ['player_one.yaml', 'player_two.yaml', 'player_three.yaml', 'player_four.yaml']
-
 # Create game
 game = PokerGame(players)
-
 # Play a round
 game.start_round()
+#play one round 
 game.betting_round()
 #game.deal_flop()
 #game.betting_round()
