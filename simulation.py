@@ -1,28 +1,4 @@
-#init players
-
-#create card deck 
-
-#player set small and big blind 
-
-#give first two cards
-
-#betting round 
-
-#first three cards 
-
-#betting round 
-
-#deal turn
-
-#betting round 
-
-#deal_river
-
-#betting round 
-
-#evaluate_hands
-
-#end round
+import json
 import random
 import yaml
 from poker import Suit, Rank, Card, Hand
@@ -42,6 +18,64 @@ handler.setFormatter(formatter)
 
 # Add the handlers to the logger
 logger.addHandler(handler)"""
+
+value_map = {
+    '2♠': 'Two of Spades',
+    '2♣': 'Two of Clubs',
+    '2♦': 'Two of Diamonds',
+    '2♥': 'Two of Hearts',
+    '3♠': 'Three of Spades',
+    '3♣': 'Three of Clubs',
+    '3♦': 'Three of Diamonds',
+    '3♥': 'Three of Hearts',
+    '4♠': 'Four of Spades',
+    '4♣': 'Four of Clubs',
+    '4♦': 'Four of Diamonds',
+    '4♥': 'Four of Hearts',
+    '5♠': 'Five of Spades',
+    '5♣': 'Five of Clubs',
+    '5♦': 'Five of Diamonds',
+    '5♥': 'Five of Hearts',
+    '6♠': 'Six of Spades',
+    '6♣': 'Six of Clubs',
+    '6♦': 'Six of Diamonds',
+    '6♥': 'Six of Hearts',
+    '7♠': 'Seven of Spades',
+    '7♣': 'Seven of Clubs',
+    '7♦': 'Seven of Diamonds',
+    '7♥': 'Seven of Hearts',
+    '8♠': 'Eight of Spades',
+    '8♣': 'Eight of Clubs',
+    '8♦': 'Eight of Diamonds',
+    '8♥': 'Eight of Hearts',
+    '9♠': 'Nine of Spades',
+    '9♣': 'Nine of Clubs',
+    '9♦': 'Nine of Diamonds',
+    '9♥': 'Nine of Hearts',
+    'T♠': 'Ten of Spades',
+    'T♣': 'Ten of Clubs',
+    'T♦': 'Ten of Diamonds',
+    'T♥': 'Ten of Hearts',
+    'J♠': 'Jack of Spades',
+    'J♣': 'Jack of Clubs',
+    'J♦': 'Jack of Diamonds',
+    'J♥': 'Jack of Hearts',
+    'Q♠': 'Queen of Spades',
+    'Q♣': 'Queen of Clubs',
+    'Q♦': 'Queen of Diamonds',
+    'Q♥': 'Queen of Hearts',
+    'K♠': 'King of Spades',
+    'K♣': 'King of Clubs',
+    'K♦': 'King of Diamonds',
+    'K♥': 'King of Hearts',
+    'A♠': 'Ace of Spades',
+    'A♣': 'Ace of Clubs',
+    'A♦': 'Ace of Diamonds',
+    'A♥': 'Ace of Hearts'
+}
+
+
+
 
 
 class PokerGame:
@@ -96,7 +130,7 @@ class PokerGame:
         #print(self.player_data)
 
     def openai(self, prompt, temperature):
-        openai.api_key = "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"
+        openai.api_key = "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"
         model = "gpt-3.5-turbo"
         temperature = temperature
         messages = [
@@ -113,34 +147,112 @@ class PokerGame:
         )
         result = response.choices[0]['message']['content']
         return result
-
-    def player_action(self, next_player, round_history, round):
-        player_data = self.player_data[next_player]
+    
+    def get_player_personality(self, player):
         player_personality = f"""
-        name: {player_data["playerName"]}
-        personality description: {player_data["description"]}
-        aggressiveness: {player_data["attributes"]["aggressiveness"]}
-        risk tolerance: {player_data["attributes"]["riskTolerance"]}
-        strategy: {player_data["attributes"]["strategy"]}
+        name: {player["playerName"]}
+        personality description: {player["description"]}
+        aggressiveness: {player["attributes"]["aggressiveness"]}
+        risk tolerance: {player["attributes"]["riskTolerance"]}
+        strategy: {player["attributes"]["strategy"]}
         """        
+        return player_personality
+    
+    def convert_cards_to_prompt_format(self, community_cards):
+        converted_cards = [value_map[str(card)] for card in community_cards]
+        return converted_cards
+    
+    def get_round(self, round):
+        community_cards_prompt_format = self.convert_cards_to_prompt_format(self.community_cards)
+        cards_string = ", ".join(community_cards_prompt_format)
         rounds = [
             "It's pre-flop and there are no community cards on the table.",
-            f"It's the flop and the community cards on the table are {self.community_cards}.",
-            f"It's the turn and the community cards on the table are {self.community_cards}.",
-            f"It's the river and the community cards on the table are {self.community_cards}.",
-            f"It's post-river, the final betting round and the community cards on the table are {self.community_cards}."
+            f"It's the flop and the community cards on the table are: {cards_string}.",
+            f"It's the turn and the community cards on the table are: {cards_string}.",
+            f"It's the river and the community cards on the table are: {cards_string}.",
+            f"It's post-river, the final betting round and the community cards on the table are: {cards_string}."
         ]
+        round = rounds[round-1]
+        return round
+    
+    def get_prompt(self, player_personality, game_round, player_data, round_history):
+        """
+        need to improve prompt
+        1. first give personality
+        2. share chipcount of other players
+        3. game round with community cards
+        5. history
+        6. my chipcount and possible options
+        """
+        player_cards_prompt_format = self.convert_cards_to_prompt_format(player_data["hand"])
+        prompt_one = """
+        You are playing a 4 player Texas No-limit Holdem poker game. You have the following personality:
+
+        {player_personality}
+
+        The chip count of the other players are as follows:
+
+        {player}: {chip_count}
+        {player}: {chip_count}
+        {player}: {chip_count}
+
+        {game_round} and your hand is: {player_cards_prompt_format}. the history of the current round is {round_history}.
+
+        
+        """
         prompt = f"""
         You are playing a 4 player Texas No-limit Holdem poker game. You have the following personality:
 
         {player_personality}
 
-        {rounds[round-1]} and your hand is {player_data["hand"]}. the history of the current round is {round_history}.
+        {game_round} and your hand is {player_data["hand"]}. the history of the current round is the following: {round_history}.
 
         Your decisions can be one of fold, raise or limp. Provide your decision without any explanation in the following format:
         DECISION(Raise, Fold, Limp), N BB (if placing a bet, replace N by bet amount)
         """    
-        result = self.openai(prompt, 0.0)    
+        return prompt
+    
+    def openai_extractor(self, response):
+        openai.api_key = "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"
+        model = "gpt-3.5-turbo"
+        temperature = 0.0
+        messages = [
+            {
+                "role": "system",
+                "content": "You will be provided with unstructured data containing an action, and in the case of a raise or call, a value for a bet. The format will be: 'DECISION(Raise, Fold, Limp), N BB (if placing a bet, replace N by bet amount)'. Your task is to parse it into JSON format."
+            },
+            {
+                "role": "user",
+                "content": "Raise, 2 BB"
+            }
+        ]
+        response = openai.ChatCompletion.create(
+            model=model,
+            messages=messages,
+            temperature=temperature,
+            max_tokens=100,
+        )
+        result = response.choices[0]['message']['content']
+        return result
+    
+    def json_extractor(self, response):
+        data = json.loads(response)
+        decision = data['decision']
+        bet = data['bet']
+        return decision, bet
+
+    def extract_action(self, action):
+        extract_decision_openai = self.openai_extractor(action)
+        decision, bet = self.json_extractor(extract_decision_openai)
+        return decision, bet
+
+    def player_action(self, next_player, round_history, round):
+        player_data = self.player_data[next_player]
+        player_personality = self.get_player_personality(player_data)
+        game_round = self.get_round(round)
+        prompt = self.get_prompt(player_personality, game_round, player_data, round_history)
+        print("prompt: {}".format(prompt))
+        result = self.openai(prompt, 0.0)  
         return result
 
     def current_bet(self):
@@ -153,10 +265,6 @@ class PokerGame:
         next_player = players[(players.index(big_blind_player) + 1) % len(players)]
         i = players.index(next_player)
         return i
-    
-    def extract_action(self, action):
-        #openai response is not always clean - need to extract action appropriately
-        pass
 
     def handle_player_action(self, player, action):
         if action == 'fold':
@@ -181,11 +289,57 @@ class PokerGame:
             return True
         return False
     
+    def history_human_readable(self, round_history):
+        """
+        convert history looking like [{'player_one.yaml': ('Raise', '2 BB')}] to readable string format for prompt like:
+
+        player 1 bets 2 chips
+        player 2 folds
+        ...
+
+        [{'player_one.yaml': ('Raise', '2 BB')}, {'player_two.yaml': ('Raise', '2 BB')}] - whats the standard format for poker, on what was a llm most trained on?
+
+        Poker game: Hold'em No Limit ($0.50/$1.00)
+
+        Seat 1: PlayerA ($100 in chips)
+        Seat 2: PlayerB ($100 in chips)
+        Seat 3: PlayerC ($100 in chips)
+        PlayerA posts small blind $0.50
+        PlayerB posts big blind $1
+        *** HOLE CARDS ***
+        Dealt to PlayerA [Ad Kh]
+        PlayerC folds
+        PlayerA raises $3 to $4
+        PlayerB calls $3
+        *** FLOP *** [5d 7h 2c]
+        PlayerA checks
+        PlayerB checks
+        *** TURN *** [5d 7h 2c] [9s]
+        PlayerA bets $6
+        PlayerB folds
+        PlayerA collected $8.50 from pot
+        *** SUMMARY ***
+        Total pot $9 | Rake $0.50
+        Board [5d 7h 2c 9s]
+        Seat 1: PlayerA (small blind) showed [Ad Kh] and won ($8.50) with high card Ace
+        Seat 2: PlayerB (big blind) folded on the Turn
+        Seat 3: PlayerC (button) folded before Flop (didn't bet)
+        """
+        
+        return history
+
+    def show_options_in_prompt(self):
+        """
+        makes llm at the end clear how much chips you have to make clear to which value can be raised + current bet is clearly displayed
+        """
+        pass
+    
     def betting_round(self):
         #set small and big blinds
         self.set_blinds()
         #person after big blind is starting the bet 
         i = self.determine_starting_player_index_in_betting_round()
+        #add small blind and big blind to history
         round_history = []
         for round in range(1, 6):
             print("---ROUND {}---".format(round))
@@ -193,16 +347,17 @@ class PokerGame:
             while True:
                 #if player folded already skip to next player
                 i = self.skip_folded_player(i)
+                print("player turn: {}".format(self.players[i]))
                 #let player make an action 
-                action = self.player_action(self.players[i], round_history, round)
+                round_history_readable = self.history_human_readable(round_history)
+                action = self.player_action(self.players[i], round_history_readable, round)
+                print("action: {}".format(action))
                 #function for extracting decision made by player
                 action_extracted = self.extract_action(action)
                 print("action extracted: {}".format(action_extracted))
                 #todo need to add action and in case of raise/call specific amount also
                 round_history.append({self.players[i]: action_extracted})
-
                 self.handle_player_action(self.players[i], action_extracted)
-
                 i = (i + 1) % len(self.players)
                 # Check if all players have had a chance to act and all remaining players have bet the same amount
                 if self.check_end_of_round(i):
