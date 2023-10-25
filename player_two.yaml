@@ -13,4 +13,5 @@ attributes:
 
 # The initial number of chips the player has at the start of the game
 chips: 1000
+blind:
 

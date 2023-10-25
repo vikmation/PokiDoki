@@ -75,8 +75,60 @@ value_map = {
 }
 
 
+import random
+
+SMALL_BLIND = 20
+BIG_BLIND = 10
+#lets make it again with methods only. 
+def main():
+    player_one, player_two, player_three, player_four = init_players()
+    print(player_one)
+    players = [player_one, player_two, player_three, player_four]
+    blinds = set_blinds_first_round(players)
+    #adjust player chips and blinds
 
 
+    #need to update pot, i.e. need to update respective player values + pot
+    update_pot_and_players()
+    #print(player_one)
+
+def init_players():
+    players = ['player_one.yaml', 'player_two.yaml', 'player_three.yaml', 'player_four.yaml']
+    player_data = []
+    for player_file in players:
+        with open(player_file, 'r') as file:
+            player_data.append(yaml.safe_load(file))
+    return player_data
+
+def get_random_player(players):
+    random_player = random.choice(players)
+    return random_player
+
+def get_next_player(players, random_player):
+    current_index = players.index(random_player)
+    next_index = (current_index + 1) % len(players)
+    next_player = players[next_index]
+    return next_player
+
+def adjust_player_chips():
+    pass
+
+def adjust_pot():
+    pass
+
+def set_blinds_first_round(players):
+    random_player = get_random_player(players)
+    random_player['blind'] = 'small'
+    next_player = get_next_player(players, random_player)
+    next_player['blind'] = 'big'
+    adjust_player_chips()
+    adjust_pot()
+
+main()
+
+def set_blinds():
+    #pick a random player 
+    pass
 
 class PokerGame:
     def __init__(self, players):
@@ -382,13 +434,13 @@ class PokerGame:
 # Create players
 #players = [Player("Alice", 1000), Player("Bob", 1000)]
 #todo make this the path to the yaml file
-players = ['player_one.yaml', 'player_two.yaml', 'player_three.yaml', 'player_four.yaml']
+#players = ['player_one.yaml', 'player_two.yaml', 'player_three.yaml', 'player_four.yaml']
 # Create game
-game = PokerGame(players)
+#game = PokerGame(players)
 # Play a round
-game.start_round()
+#game.start_round()
 #play one round 
-game.betting_round()
+#game.betting_round()
 #game.deal_flop()
 #game.betting_round()
 #game.deal_turn()
