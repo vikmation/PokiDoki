@@ -3,6 +3,9 @@ import yaml
 from poker import Suit, Rank, Card, Hand
 from open_ai import OpenAI
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 OPENAI_API_KEY = os.getenv('openai_key')
 
@@ -78,6 +81,7 @@ class PokerGame:
         self.players = self.init_players()
         self.model = OpenAI(key=OPENAI_API_KEY, model="gpt-4", temperature=0.0)
         self.community_cards = []
+        self.history = []
 
     def init_players(self):
         players = ['player_one.yaml', 'player_two.yaml', 'player_three.yaml', 'player_four.yaml']
@@ -105,6 +109,10 @@ class PokerGame:
     def adjust_pot(self, chips):
         self.pot += sum(chips)
 
+    def add_history(self, strings):
+        for i in strings:
+            self.history.append(i)
+
     def set_blinds_first_round(self):
         random_player = self.get_random_player()
         random_player['blind'] = 'small'
@@ -112,6 +120,9 @@ class PokerGame:
         next_player['blind'] = 'big'
         self.adjust_player_chips([{self.small_blind: random_player}, {self.big_blind: next_player}])
         self.adjust_pot([self.small_blind, self.big_blind])
+        str_to_add_to_history_first_player= random_player['playerName'] + ": " + str(self.small_blind) + " chips small blind"
+        str_to_add_to_history_second_player = next_player['playerName'] + ": " + str(self.big_blind) + " chips big blind"
+        self.add_history([str_to_add_to_history_first_player, str_to_add_to_history_second_player])
 
     #first two cards are dealed
     def pre_flop(self):
@@ -130,12 +141,11 @@ class PokerGame:
         """
         generates player personality string which later can be inserted into the prompt
         """
-        #{'playerName': 'Player One', 'playerImage': None, 'description': 'description of player with attributes', 'voice': None, 'attributes': {'aggressiveness': 7, 'riskTolerance': 5, 'strategy': 'balanced'}, 'chips': 1000, 'blind': None, 'hand': [Card('Q♦'), Card('3♦')]}
-        player_personality = f"""
-        Player Name: {player['playerName']}
-        Description: {player['description']}
-        Attributes: {player['attributes']}
-        """
+        player_personality = (
+            "Player Name: " + player['playerName'].strip() + "\n" +
+            "Description: " + player['description'].strip() + "\n" +
+            "Attributes: " + str(player['attributes']).strip()
+        )
         return player_personality
     
     def get_player_hand(self, player):
@@ -159,50 +169,57 @@ class PokerGame:
             return ROUNDS[round]
         else:
             return ROUNDS[round] + community_cards + "."
+        
+    def get_history(self):
+        """
+        returns the history of the current poker game round 
+        """
+        # Join the history items together with a newline character
+        history_string = "\n".join(self.history)
+        return history_string
 
     def create_prompt(self, player, round):
         player_personality = self.get_player_personality(player)
-        #how are i am going to make the game round?
         game_round = self.get_game_round(round)
         player_hand = self.get_player_hand(player)
+        history = self.get_history()
 
-        prompt = f"""
-        You are playing a 4 player Texas No-limit Holdem poker game. You have the following personality:
-
-        ---
-        {player_personality}
-        ---
-
-        {ROUNDS[game_round]} and you have the following cards in your hand:
-
-        ---
-        {player_hand}
-        ---
-   
-        the history of the current round is the following: 
-        
-        ---
-        {round_history}
-        ---
-
-        Your decisions can be one of fold, raise or limp. Provide your decision without any explanation in the following format:
-
-        DECISION(Raise, Fold, Limp), N BB (if placing a bet, replace N by bet amount)
-        """            
+        prompt = (
+            "You are playing a 4 player Texas No-limit Holdem poker game. You have the following personality:\n\n" +
+            "---\n" +
+            player_personality + "\n" +
+            "---\n\n" +
+            game_round + " You have the following cards in your hand:\n\n" +
+            "---\n" +
+            player_hand + "\n" +
+            "---\n\n" +
+            "The history of the current round is the following:\n\n" +
+            "---\n" +
+            history + "\n" +
+            "---\n\n" +
+            "Your decisions can be one of fold, raise or limp. Provide your decision without any explanation in the following format:\n\n" +
+            "DECISION(Raise, Fold, Limp), N BB (if placing a bet, replace N by bet amount)"
+        )
+        return prompt
 
     def generate_player_response(self, player, game_round):
-        #player is making a bet need to define prompt 
         prompt = self.create_prompt(player, game_round)
-        #need to add prompt to 
+        #need to add this to open ai - can first test to add raw string and later i am going to add the system prompt with the player personality maybe
+        response = self.model.generate(prompt)
+        print(response)
 
     def betting_pre_flop(self):
         player_after_big_blind = self.get_player_after_big_blind()
         #let player make bet 
         game_round = 0
         player_response = self.generate_player_response(player_after_big_blind, game_round)
-        #person after big blind starts bettting
+        self.history.append(player_response)
+        #need to add response to history
+        
+        
 
 def main():
+    #specify number of rounds which should be played 
     game = PokerGame()
     game.set_blinds_first_round()
     game.pre_flop()
@@ -211,3 +228,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

@@ -6,7 +6,24 @@ class OpenAI:
         self.model = model
         self.temperature = temperature
 
-    def generate(self, system, user):
+    def generate(self, user):
+        messages = [
+            {
+                "role": "user",
+                "content": user
+            }
+        ]
+        response = openai.ChatCompletion.create(
+            model=self.model,
+            messages=messages,
+            temperature=self.temperature,
+            max_tokens=512,
+        )
+        result = response.choices[0]['message']['content']
+        return result
+
+    #todo add later support for system
+    """def generate(self, system, user):
         messages = [
             {
                 "role": "system",
@@ -24,4 +41,4 @@ class OpenAI:
             max_tokens=512,
         )
         result = response.choices[0]['message']['content']
-        return result
+        return result"""
